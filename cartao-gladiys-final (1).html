@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feliz Dia das Mães 💌</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,200;0,300;0,400;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;1,9..144,300;1,9..144,400;1,9..144,600&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rose:#e07090;--rose-deep:#c0496a;--rose-dark:#8b2a45;--rose-darker:#5a1535;
+  --gold:#d4a040;--gold-soft:#f0d080;
+  --bg:#fff6f8;--text:#1a0810;--text-mid:#6b3a4a;--text-soft:#b08090;
+  --env-body:#f5dde5;--env-flap:#e8c8d5;--env-shadow:rgba(139,42,69,.25);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:"DM Sans",sans-serif;
+  background:radial-gradient(ellipse at 50% 30%, #fce8ec 0%, #fff0f4 40%, #fff6f8 100%);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* ═══ CONFETTI CANVAS ═══ */
+#confetti-canvas{position:fixed;inset:0;z-index:9999;pointer-events:none;display:none}
+
+/* ═══════════════════════════════
+   SPLASH — envelope scene
+   ═══════════════════════════════ */
+#splash{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 30%, #fce8ec 0%, #ffeef3 40%, #fff4f7 100%);
+  overflow:hidden;
+  transition:opacity 1s ease;
+}
+#splash.hide{opacity:0;pointer-events:none}
+
+/* soft bg petals */
+.bg-petal{
+  position:absolute;font-size:2rem;opacity:.06;
+  pointer-events:none;user-select:none;
+}
+
+.splash-top{
+  text-align:center;margin-bottom:48px;
+  animation:fadeup .8s ease both;
+}
+.splash-eyebrow{
+  font-size:.65rem;font-weight:300;letter-spacing:.45em;
+  text-transform:uppercase;color:var(--text-soft);margin-bottom:12px;
+}
+.splash-title{
+  font-family:"Fraunces",serif;font-style:italic;font-weight:300;
+  font-size:clamp(1.8rem,4vw,2.8rem);color:var(--rose-dark);line-height:1.2;
+}
+.splash-title em{
+  font-style:normal;font-weight:600;color:var(--rose-deep);
+}
+
+@keyframes fadeup{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* ═══ ENVELOPE 3D ═══ */
+.env-scene{
+  perspective:1200px;
+  animation:fadeup .8s ease both .2s;
+  position:relative;
+}
+
+.envelope{
+  width:min(420px,88vw);
+  position:relative;
+  cursor:pointer;
+  transform-style:preserve-3d;
+  transition:transform .3s ease;
+}
+.envelope:hover{transform:translateY(-6px) rotateX(2deg)}
+
+/* ENVELOPE BODY — the pocket */
+.env-body{
+  width:100%;
+  aspect-ratio:1.7/1;
+  background:linear-gradient(160deg,#fdeef3 0%,#f5d8e5 50%,#ecc5d5 100%);
+  border-radius:8px 8px 10px 10px;
+  position:relative;
+  box-shadow:
+    0 30px 70px var(--env-shadow),
+    0 8px 24px rgba(139,42,69,.12),
+    inset 0 -2px 0 rgba(139,42,69,.08);
+  overflow:visible;
+}
+
+/* inner fold lines (V shape from bottom) */
+.env-body::before{
+  content:'';position:absolute;inset:0;border-radius:8px 8px 10px 10px;
+  background:
+    linear-gradient(135deg,transparent 49.2%,rgba(192,73,106,.1) 49.2%,rgba(192,73,106,.1) 50.3%,transparent 50.3%),
+    linear-gradient(225deg,transparent 49.2%,rgba(192,73,106,.1) 49.2%,rgba(192,73,106,.1) 50.3%,transparent 50.3%);
+}
+
+/* gold border */
+.env-body::after{
+  content:'';position:absolute;inset:0;border-radius:8px 8px 10px 10px;
+  border:1.5px solid rgba(212,160,64,.25);pointer-events:none;
+}
+
+/* ── FLAP (top triangle) ── */
+.env-flap{
+  position:absolute;top:0;left:0;right:0;
+  height:55%;
+  transform-origin:top center;
+  transform-style:preserve-3d;
+  transition:transform .8s cubic-bezier(.4,0,.2,1);
+  z-index:10;
+}
+
+/* flap face (visible from front) */
+.env-flap-front{
+  position:absolute;inset:0;
+  background:linear-gradient(175deg,#fce8f0 0%,#f0c8d8 60%,#e5b0c8 100%);
+  clip-path:polygon(0 0, 100% 0, 50% 78%);
+  box-shadow:0 4px 12px rgba(139,42,69,.12);
+  filter:drop-shadow(0 3px 8px rgba(139,42,69,.15));
+}
+
+/* gold border on flap */
+.env-flap-front::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(175deg,rgba(212,160,64,.08) 0%,transparent 60%);
+  clip-path:polygon(0 0, 100% 0, 50% 78%);
+}
+
+/* flap back (visible when open) */
+.env-flap-back{
+  position:absolute;inset:0;
+  background:linear-gradient(175deg,#e8c0d0 0%,#d8a8c0 60%);
+  clip-path:polygon(0 0, 100% 0, 50% 78%);
+  transform:rotateX(180deg);
+  backface-visibility:hidden;
+}
+
+/* OPEN STATE */
+.envelope.open .env-flap{
+  transform:rotateX(-180deg);
+}
+
+/* ── SEAL ── */
+.env-seal{
+  position:absolute;
+  top:42%;left:50%;
+  transform:translate(-50%,-50%);
+  z-index:20;
+  width:68px;height:68px;
+  background:conic-gradient(from 0deg,var(--gold) 0%,var(--gold-soft) 25%,var(--gold) 50%,var(--gold-soft) 75%,var(--gold) 100%);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 5px rgba(212,160,64,.2),0 0 0 10px rgba(212,160,64,.08),0 6px 24px rgba(160,112,32,.4);
+  animation:sealpulse 2.8s ease-in-out infinite;
+  transition:opacity .3s ease, transform .3s ease;
+  font-size:1.8rem;
+  cursor:pointer;
+}
+.envelope.open .env-seal{opacity:0;transform:translate(-50%,-50%) scale(0)}
+@keyframes sealpulse{
+  0%,100%{box-shadow:0 0 0 5px rgba(212,160,64,.2),0 0 0 10px rgba(212,160,64,.08),0 6px 24px rgba(160,112,32,.4)}
+  50%{box-shadow:0 0 0 8px rgba(212,160,64,.15),0 0 0 18px rgba(212,160,64,.04),0 8px 32px rgba(160,112,32,.5)}
+}
+
+/* ── LETTER INSIDE ── */
+.env-letter{
+  position:absolute;
+  bottom:8%;left:8%;right:8%;
+  height:85%;
+  background:#fffaf8;
+  border-radius:4px;
+  z-index:5;
+  transform:translateY(0%) scaleY(.9);
+  transform-origin:bottom center;
+  opacity:0;
+  transition:transform .7s cubic-bezier(.2,.8,.3,1) .3s, opacity .4s ease .3s;
+  box-shadow:0 -4px 20px rgba(139,42,69,.1),0 2px 8px rgba(139,42,69,.08);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.envelope.open .env-letter{
+  transform:translateY(-62%);
+  opacity:1;
+}
+.env-letter-preview{
+  text-align:center;padding:12px 16px;
+}
+.env-letter-preview p{
+  font-family:"Fraunces",serif;font-style:italic;
+  font-size:.85rem;color:var(--rose-deep);
+  line-height:1.5;
+}
+.env-letter-preview span{
+  display:block;font-size:1.2rem;margin-bottom:4px;
+}
+
+/* ── CTA LABEL ── */
+.env-cta{
+  text-align:center;
+  margin-top:28px;
+  animation:fadeup .8s ease both .4s;
+}
+.env-cta-main{
+  font-family:"Fraunces",serif;font-style:italic;
+  font-size:1.1rem;color:var(--rose-dark);
+  margin-bottom:4px;
+  display:block;
+}
+.env-cta-sub{
+  font-size:.68rem;font-weight:300;letter-spacing:.35em;
+  text-transform:uppercase;color:var(--text-soft);
+  animation:blink 2.2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:.35}50%{opacity:1}}
+
+/* ═════════════════════════════
+   MAIN — landing page
+   ═════════════════════════════ */
+#main{display:none;opacity:0;transition:opacity 1s ease}
+#main.vis{opacity:1}
+
+.fpetal{position:fixed;z-index:5;pointer-events:none;opacity:0;animation:fcair linear infinite;user-select:none}
+@keyframes fcair{0%{transform:translateY(-60px) rotate(0deg);opacity:0}8%{opacity:.8}90%{opacity:.3}100%{transform:translateY(105vh) rotate(480deg);opacity:0}}
+
+/* HERO */
+.hero{
+  min-height:100vh;display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:center;
+  background:linear-gradient(145deg,var(--rose-darker) 0%,var(--rose-dark) 40%,var(--rose-deep) 75%,var(--rose) 100%);
+  padding:60px 80px;gap:60px;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='38' fill='none' stroke='%23fff' stroke-width='.4' opacity='.04'/%3E%3C/svg%3E");
+}
+.hero::after{
+  content:'';position:absolute;top:0;right:-60px;bottom:0;
+  width:120px;background:var(--bg);border-radius:50% 0 0 50%;z-index:2;
+}
+.hero-text{position:relative;z-index:1}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+  border-radius:100px;padding:6px 18px;
+  font-size:.65rem;font-weight:300;letter-spacing:.35em;text-transform:uppercase;
+  color:rgba(255,255,255,.75);margin-bottom:24px;
+}
+.hero-title{
+  font-family:"Fraunces",serif;font-style:italic;font-weight:300;
+  font-size:clamp(2.8rem,5vw,4.5rem);color:#fff;line-height:1.08;
+  text-shadow:0 2px 30px rgba(0,0,0,.2);margin-bottom:16px;
+}
+.hero-title em{
+  font-style:normal;font-weight:600;display:block;
+  background:linear-gradient(135deg,#ffeaa0,var(--gold-soft));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{font-size:.9rem;font-weight:200;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.hero-photo{position:relative;z-index:3}
+.hero-photo img{
+  width:100%;max-height:70vh;object-fit:cover;border-radius:20px;display:block;
+  box-shadow:0 24px 70px rgba(0,0,0,.3);
+}
+.hero-photo::before{
+  content:'';position:absolute;inset:-3px;border-radius:23px;
+  border:2px solid rgba(212,160,64,.35);z-index:1;pointer-events:none;
+}
+
+@media(max-width:800px){
+  .hero{grid-template-columns:1fr;padding:50px 24px;gap:36px;min-height:auto}
+  .hero::after{display:none}
+}
+
+/* CONTENT */
+.content{max-width:800px;margin:0 auto;padding:70px 32px}
+@media(max-width:600px){.content{padding:50px 20px}}
+
+.sec-label{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.sec-label-line{flex:0 0 32px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+.sec-label-text{font-size:.62rem;font-weight:400;letter-spacing:.35em;text-transform:uppercase;color:var(--gold)}
+
+.photo-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;margin-bottom:64px}
+.photo-grid img{width:100%;height:100%;object-fit:cover;border-radius:16px;display:block;box-shadow:0 10px 32px rgba(139,42,69,.12);transition:transform .4s ease}
+.photo-grid img:hover{transform:scale(1.02)}
+.photo-grid-main{position:relative}
+.photo-grid-main::after{content:'';position:absolute;inset:-2px;border-radius:18px;border:2px solid rgba(212,160,64,.25);pointer-events:none}
+@media(max-width:500px){.photo-grid{grid-template-columns:1fr}}
+
+/* MESSAGE */
+.message-card{
+  background:#fff;border-radius:24px;padding:60px 40px;
+  box-shadow:0 20px 60px rgba(139,42,69,.08);
+  position:relative;overflow:hidden;margin-bottom:80px;
+}
+.message-card::before{
+  content:'“';position:absolute;top:-20px;left:20px;
+  font-family:"Fraunces",serif;font-size:12rem;color:var(--rose);opacity:.08;
+}
+.msg-body{
+  font-family:"Fraunces",serif;font-size:clamp(1.1rem,2.5vw,1.4rem);
+  line-height:1.8;color:var(--text-mid);font-weight:300;
+  text-align:center;position:relative;z-index:1;
+}
+.msg-body strong{font-weight:600;color:var(--rose-dark)}
+.msg-sign{
+  margin-top:40px;font-family:"Pinyon Script",cursive;
+  font-size:2.2rem;color:var(--rose-deep);text-align:center;
+}
+
+/* MINI PLAYER */
+#mini-player{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);
+  width:min(400px,92vw);background:rgba(255,255,255,.95);
+  backdrop-filter:blur(12px);border-radius:20px;padding:12px 16px;
+  display:flex;align-items:center;gap:16px;z-index:1000;
+  box-shadow:0 12px 40px rgba(0,0,0,.15);
+  transition:transform .6s cubic-bezier(.2,.8,.3,1);
+}
+#mini-player.show{transform:translateX(-50%) translateY(0)}
+
+.mp-vinyl{
+  width:48px;height:48px;border-radius:50%;
+  background:radial-gradient(circle,#333 30%,#111 100%);
+  position:relative;flex-shrink:0;
+  animation:spin 4s linear infinite;animation-play-state:paused;
+}
+.mp-vinyl.on{animation-play-state:running}
+.mp-vinyl::after{
+  content:'';position:absolute;inset:18px;border-radius:50%;
+  background:var(--rose);border:2px solid #000;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.mp-info{flex-grow:1;min-width:0}
+.mp-name{font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-artist{font-size:.65rem;color:var(--text-soft)}
+
+.mp-prog{flex:0 0 80px}
+.mp-bar{height:4px;background:rgba(0,0,0,.05);border-radius:2px;cursor:pointer;position:relative;margin-bottom:4px}
+.mp-fill{height:100%;background:var(--rose);border-radius:2px;width:0%}
+.mp-times{display:flex;justify-content:space-between;font-size:.55rem;color:var(--text-soft);font-variant-numeric:tabular-nums}
+
+.mp-btn{
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:var(--rose);color:#fff;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .2s;
+}
+.mp-btn:active{transform:scale(.9)}
+
+/* footer */
+.footer{text-align:center;padding:40px 20px 100px;border-top:1px solid rgba(212,160,64,.1)}
+.footer-brand{display:inline-flex;align-items:center;gap:12px;margin-bottom:6px}
+.footer-dot{width:5px;height:5px;border-radius:50%;background:linear-gradient(135deg,var(--gold-soft),var(--gold))}
+.footer-name{font-family:"Fraunces",serif;font-style:italic;font-size:1.05rem;color:var(--rose-deep);font-weight:300}
+.footer-tag{font-size:.6rem;font-weight:300;letter-spacing:.28em;text-transform:uppercase;color:var(--text-soft);opacity:.6}
+
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .85s ease,transform .85s cubic-bezier(.2,.8,.3,1)}
+.reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+<audio id="audio" preload="auto">
+  <source src="https://files.catbox.moe/ie73rb.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ═══ SPLASH ═══ -->
+<div id="splash">
+  <div class="bg-petal" style="top:10%;left:15%">🌸</div>
+  <div class="bg-petal" style="top:20%;right:10%">🌺</div>
+  <div class="bg-petal" style="bottom:15%;left:20%">🌷</div>
+  <div class="bg-petal" style="bottom:25%;right:15%">🌼</div>
+
+  <div class="splash-top">
+    <p class="splash-eyebrow">Dia das Mães · 2026</p>
+    <h1 class="splash-title">Uma mensagem<br>especial para <em>você</em></h1>
+  </div>
+
+  <div class="env-scene">
+    <div class="envelope" id="envelope" onclick="abrirEnvelope()">
+      <div class="env-flap">
+        <div class="env-flap-front"></div>
+        <div class="env-flap-back"></div>
+      </div>
+      <div class="env-seal">🌸</div>
+      <div class="env-body">
+        <div class="env-letter">
+          <div class="env-letter-preview">
+            <span>💌</span>
+            <p>Feliz Dia das Mães</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="env-cta">
+    <span class="env-cta-main">Feliz Dia das Mães</span>
+    <span class="env-cta-sub">✦ clique no envelope para abrir ✦</span>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+  <div id="petals-container"></div>
+  
+  <div class="hero">
+    <div class="hero-text">
+      <div class="hero-eyebrow">
+        <span>🌸</span> Dia das Mães · 2026
+      </div>
+      <h2 class="hero-title">Para a minha<br><em>Mãe Rainha</em></h2>
+      <p class="hero-sub">Com todo o meu amor</p>
+    </div>
+    <div class="hero-photo">
+      <img src="https://historiacantadaoficial.github.io/Mae/IMG_20240728_131100_735.jpg" alt="Foto com a Mãe">
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="sec-label reveal">
+      <div class="sec-label-line"></div>
+      <span class="sec-label-text">Nossa História</span>
+    </div>
+
+    <div class="photo-grid reveal">
+      <div class="photo-grid-main">
+        <img src="https://historiacantadaoficial.github.io/Mae/IMG-20241020-WA0057.jpg" alt="Momento em família">
+      </div>
+      <div style="display:grid;gap:12px">
+        <img src="https://historiacantadaoficial.github.io/Mae/IMG-20241020-WA0058.jpg" alt="Detalhe">
+        <img src="https://historiacantadaoficial.github.io/Mae/IMG-20241020-WA0059.jpg" alt="Detalhe">
+      </div>
+    </div>
+
+    <div class="message-card reveal">
+      <p class="msg-body">
+        Mãe, a senhora criou dois filhos <strong>sozinha</strong> — com uma força que poucos têm coragem de ter.<br><br>
+        Quando faltou o pai, a senhora não esperou. Assumiu os dois papéis com amor e dignidade. <strong>Mãe e pai ao mesmo tempo.</strong> E fez isso com perfeição.<br><br>
+        Laura e Luiza têm a sorte de ter uma avó como você. E se elas têm um pai presente e amoroso, é <strong>porque você o criou assim.</strong><br><br>
+        A senhora é nossa rainha. A base de tudo. <strong>Te amamos muito.</strong> ❤️
+      </p>
+      <div class="msg-sign">Com amor, seus filhos e netas ❤️</div>
+    </div>
+
+    <div class="footer reveal">
+      <div class="footer-brand">
+        <div class="footer-dot"></div>
+        <span class="footer-name">História Cantada</span>
+        <div class="footer-dot"></div>
+      </div>
+      <p class="footer-tag">✦ feito com amor ✦</p>
+    </div>
+  </div>
+</div>
+
+<!-- MINI PLAYER (fixed bottom) -->
+<div id="mini-player">
+  <div class="mp-vinyl" id="mpVinyl"></div>
+  <div class="mp-info">
+    <p class="mp-name">Canção para Minha Mãe Rainha</p>
+    <p class="mp-artist">História Cantada · 2026</p>
+  </div>
+  <div class="mp-prog">
+    <div class="mp-bar" onclick="seekar(event)">
+      <div class="mp-fill" id="mpFill"></div>
+    </div>
+    <div class="mp-times">
+      <span id="tAtual">0:00</span>
+      <span id="tTotal">0:00</span>
+    </div>
+  </div>
+  <button class="mp-btn" id="mpBtn" onclick="togglePlay()">⏸</button>
+</div>
+
+<script>
+/* ── CONFETTI ── */
+const canvas=document.getElementById('confetti-canvas');
+const ctx=canvas.getContext('2d');
+let particles=[];let raf;
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+addEventListener('resize',resize);resize();
+
+const SHAPES=['❤️','🦋','🌸','🌺','💕','🌷'];
+function makeP(){
+  return{
+    x:Math.random()*canvas.width,
+    y:-40-Math.random()*300,
+    emoji:SHAPES[Math.floor(Math.random()*SHAPES.length)],
+    size:16+Math.random()*20,
+    vx:(Math.random()-.5)*3,
+    vy:4+Math.random()*5,
+    alpha:1,spin:(Math.random()-.5)*.1,
+    angle:Math.random()*Math.PI*2,
+  };
+}
+function drawP(p){
+  ctx.save();ctx.globalAlpha=p.alpha;
+  ctx.translate(p.x,p.y);ctx.rotate(p.angle);
+  ctx.font=p.size+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(p.emoji,0,0);
+  ctx.restore();
+}
+function animConf(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.angle+=p.spin;if(p.y>canvas.height*.3)p.alpha-=.04;drawP(p)});
+  particles=particles.filter(p=>p.alpha>0&&p.y<canvas.height+40);
+  if(particles.length)raf=requestAnimationFrame(animConf);
+  else{ctx.clearRect(0,0,canvas.width,canvas.height);canvas.style.display='none'}
+}
+function launchConfetti(){
+  canvas.style.display='block';
+  for(let i=0;i<200;i++)particles.push(makeP());
+  cancelAnimationFrame(raf);animConf();
+}
+
+/* ── AUDIO ── */
+const audio=document.getElementById('audio');
+const mpBtn=document.getElementById('mpBtn');
+const mpVinyl=document.getElementById('mpVinyl');
+const mpFill=document.getElementById('mpFill');
+const tA=document.getElementById('tAtual');
+const tT=document.getElementById('tTotal');
+let playing=false;
+
+const fmt=s=>{if(!s||isNaN(s))return'0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')};
+audio.addEventListener('loadedmetadata',()=>tT.textContent=fmt(audio.duration));
+audio.addEventListener('timeupdate',()=>{
+  if(!audio.duration)return;
+  mpFill.style.width=(audio.currentTime/audio.duration*100)+'%';
+  tA.textContent=fmt(audio.currentTime);
+});
+audio.addEventListener('ended',()=>{playing=false;mpBtn.textContent='▶';mpVinyl.classList.remove('on')});
+audio.addEventListener('play',()=>{playing=true;mpBtn.textContent='⏸';mpVinyl.classList.add('on')});
+audio.addEventListener('pause',()=>{playing=false;mpBtn.textContent='▶';mpVinyl.classList.remove('on')});
+
+function togglePlay(){if(playing)audio.pause();else audio.play()}
+function seekar(e){
+  if(!audio.duration)return;
+  const r=e.currentTarget.getBoundingClientRect();
+  audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;
+}
+
+/* ── OPEN ENVELOPE ── */
+let opened=false;
+function abrirEnvelope(){
+  if(opened)return;
+  opened=true;
+
+  // 1. open flap animation
+  document.getElementById('envelope').classList.add('open');
+
+  // 2. PLAY MUSIC RIGHT ON CLICK (user gesture = works in all browsers)
+  audio.play().catch(e=>console.log(e));
+
+  // 3. confetti after short delay
+  setTimeout(launchConfetti, 400);
+
+  // 4. transition to main page
+  setTimeout(()=>{
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(()=>{
+      document.getElementById('splash').style.display='none';
+      const main=document.getElementById('main');
+      main.style.display='block';
+      spawnPetals();
+      requestAnimationFrame(()=>requestAnimationFrame(()=>main.classList.add('vis')));
+      setTimeout(initReveal,500);
+      // show mini player
+      setTimeout(()=>{
+        const mp=document.getElementById('mini-player');
+        mp.classList.add('show');
+      },1200);
+    },1000);
+  },1800);
+}
+
+/* ── PETALS ── */
+function spawnPetals(){
+  const e=['🌸','🌺','🌷','🌼','✿','❀'];
+  const pc=document.getElementById('petals-container');
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div');p.className='fpetal';
+    p.textContent=e[i%e.length];
+    p.style.cssText=`left:${Math.random()*100}vw;font-size:${.7+Math.random()*.9}rem;animation-duration:${9+Math.random()*10}s;animation-delay:${Math.random()*14}s`;
+    pc.appendChild(p);
+  }
+}
+
+/* ── SCROLL REVEAL ── */
+function initReveal(){
+  const els=document.querySelectorAll('.reveal');
+  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}
+  }),{threshold:.1});
+  els.forEach(el=>obs.observe(el));
+}
+</script>
+</body>
+</html>
